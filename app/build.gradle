@@ -20,8 +20,8 @@ android {
 
         python {
     // Python version
-    buildPython "3.11"
-    version "3.11"  // Changed from 3.8
+    //buildPython "3.11"
+    version "3.8"  // Changed from 3.8
     
     // Pip install dependencies
     pip {
