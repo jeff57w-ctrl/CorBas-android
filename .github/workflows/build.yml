@@ -28,6 +28,14 @@ jobs:
       uses: gradle/gradle-build-action@v2
       with:
         gradle-version: 8.3
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v4
+      with:
+       python-version: '3.11'
+
+    - name: Verify Python version
+      run: python --version
       
     - name: Build APK
       run: gradle assembleDebug
