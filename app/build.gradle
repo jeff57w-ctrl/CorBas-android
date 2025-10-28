@@ -19,23 +19,23 @@ android {
         }
 
         python {
-            // Python version
-            version "3.8"
-            
-            // Pip install dependencies
-            pip {
-                install "flask==2.3.0"
-                install "flask-cors==4.0.0"
-                install "spacy==3.5.0"
-                install "pymusas==0.3.0"
-                install "pymupdf==1.23.0"
-            }
-            
-            // Install spaCy model
-            pip {
-                install "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"
-            }
-        }
+    // Python version
+    version "3.11"  // Changed from 3.8
+    
+    // Pip install dependencies
+    pip {
+        install "flask==2.3.0"
+        install "flask-cors==4.0.0"
+        install "spacy==3.5.0"
+        install "pymusas==0.3.0"
+        install "pymupdf==1.23.0"
+    }
+    
+    // Install spaCy model
+    pip {
+        install "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"
+    }
+}
     }
 
     buildTypes {
