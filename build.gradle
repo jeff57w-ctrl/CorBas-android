@@ -10,8 +10,6 @@ buildscript {
     }
 }
 
-// REMOVED: allprojects block - repositories are now in settings.gradle
-
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
