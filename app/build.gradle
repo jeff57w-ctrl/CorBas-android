@@ -1,19 +1,59 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
+plugins {
+    id 'com.android.application'
+    id 'com.chaquo.python'
+}
+
+android {
+    namespace 'com.basra.corbas'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.basra.corbas"
+        minSdk 24  // Android 7.0+
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
+        python {
+            // Python version
+            version "3.8"
+            
+            // Pip install dependencies
+            pip {
+                install "flask==2.3.0"
+                install "flask-cors==4.0.0"
+                install "spacy==3.5.0"
+                install "pymusas==0.3.0"
+                install "pymupdf==1.23.0"
+            }
+            
+            // Install spaCy model
+            pip {
+                install "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
     
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
-        classpath 'com.chaquo.python:gradle:14.0.2'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.webkit:webkit:1.7.0'
 }
