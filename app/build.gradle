@@ -19,24 +19,21 @@ android {
         }
 
         python {
-    // Python version
-    //buildPython "3.11"
-    version "3.11"  // Changed from 3.8
-    
-    // Pip install dependencies
-    pip {
-        install "flask==2.3.0"
-        install "flask-cors==4.0.0"
-        install "spacy==3.5.0"
-        install "pymusas==0.3.0"
-        install "pymupdf==1.23.0"
-    }
-    
-    // Install spaCy model
-    pip {
-        install "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"
-    }
-}
+            version "3.11"
+            
+            // NLP packages only (NO PDF libraries)
+            pip {
+                install "flask==2.3.0"
+                install "flask-cors==4.0.0"
+                install "spacy==3.5.0"
+                install "pymusas==0.3.0"
+            }
+            
+            // Install spaCy model
+            pip {
+                install "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"
+            }
+        }
     }
 
     buildTypes {
@@ -50,6 +47,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 dependencies {
@@ -57,4 +62,11 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.webkit:webkit:1.7.0'
+    
+    // PDF Libraries (Android native - NO Python dependencies!)
+    implementation 'com.github.barteksc:android-pdf-viewer:3.2.0-beta.1'
+    implementation 'com.itextpdf:itext7-core:7.2.5'
+    
+    // For PDF text extraction
+    implementation 'com.tom-roush:pdfbox-android:2.0.27.0'
 }
