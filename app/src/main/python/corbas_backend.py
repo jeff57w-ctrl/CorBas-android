@@ -1,37 +1,20 @@
 """
-CorBas Backend - Real PyMUSAS + spaCy NLP Server + PDF Highlighting
-====================================================================
-This Flask server provides real linguistic tagging using PyMUSAS and spaCy,
-plus accurate PDF highlighting using PyMuPDF.
-
-Installation:
-------------
-pip install flask flask-cors spacy pymupdf
-python -m spacy download en_core_web_sm
-pip install pymusas
-
-Run:
-----
-python corbas_backend.py
-
-The server will run on http://localhost:5000
+CorBas Backend - Android Version
+Real PyMUSAS + spaCy NLP (PDF handled by Android)
 """
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import spacy
-import fitz  # PyMuPDF
-import io
-from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for React frontend
+CORS(app)
 
 # Load spaCy model
 print("Loading spaCy model...")
 nlp = spacy.load("en_core_web_sm")
 
-# Add PyMUSAS to spaCy pipeline with proper initialization
+# Add PyMUSAS to spaCy pipeline
 print("Loading PyMUSAS...")
 HAS_PYMUSAS = False
 try:
@@ -63,8 +46,8 @@ try:
     print("✓ PyMUSAS loaded successfully with English lexicon!")
     
 except Exception as e:
-    print(f"⚠ Warning: Could not load PyMUSAS properly: {e}")
-    print("Continuing with spaCy-only tagging + fallback semantic tagger...")
+    print(f"⚠ Warning: Could not load PyMUSAS: {e}")
+    print("Continuing with fallback semantic tagger...")
     HAS_PYMUSAS = False
 
 print("Backend ready!")
@@ -79,7 +62,7 @@ def health():
         "message": "CorBas backend is running",
         "spacy": True,
         "pymusas": HAS_PYMUSAS,
-        "pymupdf": True,
+        "pdf_handling": "Android native",
         "pipes": nlp.pipe_names
     })
 
@@ -134,84 +117,6 @@ def analyze_text():
     
     except Exception as e:
         print(f"✗ Error analyzing text: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/highlight_pdf', methods=['POST'])
-def highlight_pdf():
-    """Highlight phrases in a PDF using PyMuPDF"""
-    try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file provided"}), 400
-        
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No file selected"}), 400
-        
-        import json
-        phrases_json = request.form.get('phrases', '[]')
-        phrases = json.loads(phrases_json)
-        
-        if not phrases:
-            return jsonify({"error": "No phrases to highlight"}), 400
-        
-        color_hex = request.form.get('color', '#FFFF00')
-        color_hex = color_hex.lstrip('#')
-        r = int(color_hex[0:2], 16) / 255
-        g = int(color_hex[2:4], 16) / 255
-        b = int(color_hex[4:6], 16) / 255
-        
-        print(f"Highlighting {len(phrases)} phrases in PDF: {file.filename}")
-        
-        pdf_bytes = file.read()
-        pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
-        
-        total_highlights = 0
-        
-        for page_num in range(len(pdf_document)):
-            page = pdf_document[page_num]
-            
-            for phrase in phrases:
-                phrase_lower = phrase.lower().strip()
-                
-                # Search case-insensitive
-                text_instances = page.search_for(phrase_lower, flags=fitz.TEXT_PRESERVE_WHITESPACE | fitz.TEXT_PRESERVE_LIGATURES)
-                text_instances.extend(page.search_for(phrase, flags=fitz.TEXT_PRESERVE_WHITESPACE | fitz.TEXT_PRESERVE_LIGATURES))
-                
-                for inst in text_instances:
-                    highlight = page.add_highlight_annot(inst)
-                    highlight.set_colors(stroke=(r, g, b))
-                    highlight.set_opacity(0.4)
-                    highlight.set_info(
-                        title="CorBas",
-                        content=f'"{phrase}"',
-                        creationDate=datetime.now().strftime("%Y%m%d%H%M%S")
-                    )
-                    highlight.update()
-                    total_highlights += 1
-        
-        print(f"✓ Successfully highlighted {total_highlights} occurrences")
-        
-        output_bytes = pdf_document.write()
-        pdf_document.close()
-        
-        output = io.BytesIO(output_bytes)
-        output.seek(0)
-        
-        original_name = file.filename.rsplit('.', 1)[0]
-        output_filename = f"{original_name}_highlighted.pdf"
-        
-        return send_file(
-            output,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=output_filename
-        )
-    
-    except Exception as e:
-        print(f"✗ Error highlighting PDF: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
@@ -280,30 +185,11 @@ def get_semantic_fallback(token):
         return 'Z99'
 
 
-@app.route('/corbas.html')
-def serve_html():
-    """Serve the HTML file"""
-    try:
-        with open('corbas.html', 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        return """
-        <html>
-        <body style="font-family: Arial; padding: 40px; text-align: center;">
-            <h1>⚠️ File Not Found</h1>
-            <p>Please make sure <code>corbas.html</code> is in the same folder as <code>corbas_backend.py</code></p>
-            <p><a href="/health">Check Backend Health</a></p>
-        </body>
-        </html>
-        """
-
-
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("CorBas Backend Server")
+    print("CorBas Backend Server (Android)")
     print("="*60)
     print("✓ Server running on: http://127.0.0.1:5000")
-    print("✓ Open http://127.0.0.1:5000 in your browser")
     print("")
     print("Features:")
     print("  - Real spaCy NLP (POS tagging, dependency parsing)")
@@ -311,11 +197,8 @@ if __name__ == '__main__':
         print("  - Real PyMUSAS semantic tagging (USAS categories)")
     else:
         print("  - Fallback semantic tagging")
-    print("  - PDF Highlighting with PyMuPDF (accurate!)")
+    print("  - PDF handling: Android native (iText + PDFBox)")
     print("")
-    print("⚠ IMPORTANT: Keep this window open while using CorBas!")
-    print("")
-    print("Press Ctrl+C to stop")
     print("="*60 + "\n")
     
     app.run(host='127.0.0.1', port=5000, debug=False, threaded=True)
